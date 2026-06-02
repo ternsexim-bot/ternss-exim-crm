@@ -5,6 +5,31 @@
 {% block canonical %}https://ternsexim.com/about{% endblock %}
 {% block og_url %}https://ternsexim.com/about{% endblock %}
 
+{% block extra_schema %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "About TERNS EXIM – Fastener & Merchant Exporter, Coimbatore, India",
+  "description": "Learn about TERNS EXIM – a trusted fastener exporter and merchant exporter based in Coimbatore, Tamil Nadu, India. Our mission is to deliver world-class industrial fasteners to global buyers.",
+  "url": "https://ternsexim.com/about",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "TERNS EXIM",
+    "url": "https://ternsexim.com"
+  },
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://ternsexim.com"},
+      {"@type": "ListItem", "position": 2, "name": "About", "item": "https://ternsexim.com/about"}
+    ]
+  }
+}
+</script>
+{% endblock %}
+
 {% block content %}
 
 <!-- ===== PAGE HERO ===== -->
