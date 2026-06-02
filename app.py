@@ -51,27 +51,27 @@ def products():
 def contact():
     return render_template('contact.html')
 
-@app.route('/hex-bolts-exporter-india')
+@app.route('/hex-bolts')
 def hex_bolts():
     return render_template('hex_bolts.html')
 
-@app.route('/anchor-bolts-exporter-india')
+@app.route('/anchor-bolts')
 def anchor_bolts():
     return render_template('anchor_bolts.html')
 
-@app.route('/foundation-bolts-exporter-india')
+@app.route('/foundation-bolts')
 def foundation_bolts():
     return render_template('foundation_bolts.html')
 
-@app.route('/nuts-exporter-india')
+@app.route('/nuts')
 def nuts():
     return render_template('nuts.html')
 
-@app.route('/washers-exporter-india')
+@app.route('/washers')
 def washers():
     return render_template('washers.html')
 
-@app.route('/threaded-rods-exporter-india')
+@app.route('/threaded-rods')
 def threaded_rods():
     return render_template('threaded_rods.html')
 
