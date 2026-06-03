@@ -468,6 +468,8 @@ body {
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s;
   font-family: inherit;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .nav-tab:hover { color: #e2e8f0; }

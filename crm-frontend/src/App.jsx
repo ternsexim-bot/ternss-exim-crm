@@ -1,29 +1,29 @@
-import { useState } from 'react'
+import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom'
 import Dashboard from './components/Dashboard'
 import ContactForm from './components/ContactForm'
 
-const TABS = [
-  { id: 'dashboard', label: 'CRM Dashboard' },
-  { id: 'enquiry',   label: 'Enquiry Form'  },
-]
-
 export default function App() {
-  const [tab, setTab] = useState('dashboard')
-
   return (
-    <>
+    <BrowserRouter>
       <nav className="app-nav">
-        {TABS.map(t => (
-          <button
-            key={t.id}
-            className={`nav-tab ${tab === t.id ? 'active' : ''}`}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </button>
-        ))}
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) => `nav-tab${isActive ? ' active' : ''}`}
+        >
+          CRM Dashboard
+        </NavLink>
+        <NavLink
+          to="/contact"
+          className={({ isActive }) => `nav-tab${isActive ? ' active' : ''}`}
+        >
+          Enquiry Form
+        </NavLink>
       </nav>
-      {tab === 'dashboard' ? <Dashboard /> : <ContactForm />}
-    </>
+      <Routes>
+        <Route path="/"        element={<Dashboard />} />
+        <Route path="/contact" element={<ContactForm />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
