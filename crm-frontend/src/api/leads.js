@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const api = axios.create({ baseURL: 'https://terns-exim-api.onrender.com' })
+const api = axios.create({ baseURL: 'https://ternsexim.com/api' })
 
 export const getLeads = (status) =>
   api.get('/leads', { params: status ? { status } : {} }).then(r => r.data)
