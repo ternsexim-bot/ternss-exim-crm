@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_from_directory, request, redirect, url_for
+from flask import Flask, jsonify, render_template, send_from_directory, request, redirect, url_for
 import json
 import os
 import re
@@ -170,6 +170,11 @@ def submit_lead():
 @app.route('/thank-you')
 def thank_you():
     return render_template('thank_you.html')
+
+
+@app.route('/health')
+def health():
+    return jsonify({'status': 'ok'})
 
 
 @app.after_request
