@@ -18,9 +18,13 @@ CORS(app)
 
 _DATABASE_URL = os.getenv("DATABASE_URL", "")
 
-# Render supplies postgres:// URIs; SQLAlchemy 1.4+ requires postgresql://
+# Render supplies postgres:// shorthand — normalise to postgresql://
 if _DATABASE_URL.startswith("postgres://"):
     _DATABASE_URL = _DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+# psycopg2 is incompatible with Python 3.14 — use psycopg3 dialect
+if _DATABASE_URL.startswith("postgresql://"):
+    _DATABASE_URL = _DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
 
 if _DATABASE_URL:
     app.config["SQLALCHEMY_DATABASE_URI"] = _DATABASE_URL
