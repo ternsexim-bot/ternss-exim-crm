@@ -60,7 +60,7 @@ export default function ContactForm() {
     setSubmitting(true)
     setStatus(null)
     try {
-      // POST JSON to https://ternsexim.com/api/leads — same DB as the website form
+      // POST JSON to https://terns-exim-api.onrender.com/leads
       await createLead({
         name:             form.name.trim(),
         email:            form.email.trim(),

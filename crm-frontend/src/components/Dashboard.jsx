@@ -27,7 +27,7 @@ export default function Dashboard() {
       setLeads(leadsData)
       setStats(statsData)
     } catch {
-      setError('Cannot reach backend. Make sure Flask CRM is running on port 5001.')
+      setError('Cannot reach CRM API. Check that terns-exim-api.onrender.com is running.')
     } finally {
       setLoading(false)
     }
