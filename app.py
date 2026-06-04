@@ -2,7 +2,9 @@ from flask import Flask, render_template, send_from_directory, request, redirect
 import json
 import os
 import re
+import sys
 import threading
+import time
 import urllib.request
 
 from leads import save_lead, send_whatsapp_alert
@@ -92,8 +94,10 @@ def _valid_phone(phone):
         return False
     return 7 <= len(re.sub(r'\D', '', phone)) <= 15
 
+_CRM_API_URL = 'https://terns-exim-api.onrender.com/leads'
+
 def _forward_to_crm(name, phone, email, product, message, company='', country=''):
-    """Best-effort background forward to CRM API."""
+    """Forward lead to CRM API (primary persistent storage). One retry on failure."""
     payload = json.dumps({
         'name':             name,
         'phone':            phone,
@@ -105,16 +109,34 @@ def _forward_to_crm(name, phone, email, product, message, company='', country=''
         'source':           'Website',
         'status':           'New',
     }).encode('utf-8')
-    req = urllib.request.Request(
-        'https://terns-exim-api.onrender.com/leads',
-        data=payload,
-        headers={'Content-Type': 'application/json'},
-        method='POST',
-    )
+
+    def _make_request():
+        req = urllib.request.Request(
+            _CRM_API_URL,
+            data=payload,
+            headers={'Content-Type': 'application/json'},
+            method='POST',
+        )
+        return urllib.request.urlopen(req, timeout=10)
+
     try:
-        urllib.request.urlopen(req, timeout=8)
-    except Exception:
-        pass  # non-blocking; CSV lead already saved
+        _make_request()
+        print(f'[CRM] Lead saved: {name}')
+        return
+    except Exception as exc:
+        print(f'[CRM WARNING] Attempt 1 failed for "{name}": {exc}', file=sys.stderr)
+
+    time.sleep(2)
+
+    try:
+        _make_request()
+        print(f'[CRM] Lead saved on retry: {name}')
+    except Exception as exc:
+        print(
+            f'[CRM ERROR] Retry also failed for "{name}": {exc}. '
+            f'Lead is preserved in CSV backup.',
+            file=sys.stderr,
+        )
 
 @app.route('/submit-lead', methods=['POST'])
 def submit_lead():
