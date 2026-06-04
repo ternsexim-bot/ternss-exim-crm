@@ -11,16 +11,17 @@ from leads import save_lead, send_whatsapp_alert
 
 app = Flask(__name__)
 
-# Cache static files for 1 year in production
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
 
 BASE_URL = os.environ.get('BASE_URL', 'https://ternsexim.com').rstrip('/')
 
 @app.context_processor
 def inject_seo():
-    """Inject canonical_url into every template automatically."""
     path = request.path.rstrip('/') or '/'
     return {'canonical_url': BASE_URL + path}
+
+
+# ── Static asset routes ───────────────────────────────────────────────────────
 
 @app.route('/favicon.ico')
 def favicon():
@@ -42,6 +43,9 @@ def sitemap():
         os.path.join(app.root_path, 'static'),
         'sitemap.xml', mimetype='application/xml'
     )
+
+
+# ── Page routes ───────────────────────────────────────────────────────────────
 
 @app.route('/')
 def home():
@@ -83,14 +87,25 @@ def washers():
 def threaded_rods():
     return render_template('threaded_rods.html')
 
+@app.route('/thank-you')
+def thank_you():
+    return render_template('thank_you.html')
 
-# ── Lead Capture ──────────────────────────────────────────────────────────────
 
-_PHONE_CHARS_RE = re.compile(r'^[\d\s+\-()\+]+$')
-_EMAIL_RE       = re.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
+# ── Health check ──────────────────────────────────────────────────────────────
+
+@app.route('/health')
+def health():
+    return jsonify({'status': 'ok'}), 200
+
+
+# ── Lead capture ──────────────────────────────────────────────────────────────
+
+_PHONE_RE = re.compile(r'^[\d\s+\-()\+]+$')
+_EMAIL_RE  = re.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
 
 def _valid_phone(phone):
-    if not _PHONE_CHARS_RE.match(phone):
+    if not _PHONE_RE.match(phone):
         return False
     return 7 <= len(re.sub(r'\D', '', phone)) <= 15
 
@@ -110,17 +125,17 @@ def _forward_to_crm(name, phone, email, product, message, company='', country=''
         'status':           'New',
     }).encode('utf-8')
 
-    def _make_request():
+    def _attempt():
         req = urllib.request.Request(
             _CRM_API_URL,
             data=payload,
             headers={'Content-Type': 'application/json'},
             method='POST',
         )
-        return urllib.request.urlopen(req, timeout=10)
+        urllib.request.urlopen(req, timeout=10)
 
     try:
-        _make_request()
+        _attempt()
         print(f'[CRM] Lead saved: {name}')
         return
     except Exception as exc:
@@ -129,12 +144,11 @@ def _forward_to_crm(name, phone, email, product, message, company='', country=''
     time.sleep(2)
 
     try:
-        _make_request()
+        _attempt()
         print(f'[CRM] Lead saved on retry: {name}')
     except Exception as exc:
         print(
-            f'[CRM ERROR] Retry also failed for "{name}": {exc}. '
-            f'Lead is preserved in CSV backup.',
+            f'[CRM ERROR] Retry failed for "{name}": {exc}. Lead in CSV backup.',
             file=sys.stderr,
         )
 
@@ -167,21 +181,12 @@ def submit_lead():
     return redirect(url_for('thank_you'))
 
 
-@app.route('/thank-you')
-def thank_you():
-    return render_template('thank_you.html')
-
-
-@app.route('/health')
-def health():
-    return jsonify({'status': 'ok'})
-
+# ── Security headers ──────────────────────────────────────────────────────────
 
 @app.after_request
 def add_security_headers(response):
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
-    # Allow images from flagcdn for country flags
     response.headers['Content-Security-Policy'] = (
         "default-src 'self'; "
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
@@ -192,7 +197,7 @@ def add_security_headers(response):
     )
     return response
 
+
 if __name__ == '__main__':
-    import os
     port = int(os.environ.get('PORT', 10000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port, debug=False)
